@@ -12,6 +12,7 @@ medislot-dusk-tests/
 │       ├── PKE1_ProfilTest.php         ← 12 TC: Pengelolaan Profil
 │       ├── PKE2_DataKesehatanTest.php  ← 21 TC: Data Kesehatan Dasar
 │       ├── PKE5_JadwalTest.php         ← 25 TC: Perencanaan Jadwal Pemeriksaan
+│       ├── PKE6_AuthTest.php           ← 12 TC: Registrasi, Login, Logout
 │       ├── Pages/
 │       │   ├── Page.php                ← Base Page Object
 │       │   ├── ProfilePage.php         ← Page Object untuk /profile
@@ -126,5 +127,6 @@ php artisan dusk tests/Browser/PKE5_JadwalTest.php
 | PKE-1 | 12 passed | 26 | ~48s |
 | PKE-2 | 21 passed | 37 | ~86s |
 | PKE-5 | 25 passed | 42 | ~81s |
+| PKE-6 | 12 passed | 24 | ~60s |
 
 Dijalankan pada: **2026-06-09** | Laravel 13.5 | Chrome 148 | PHP 8.x
