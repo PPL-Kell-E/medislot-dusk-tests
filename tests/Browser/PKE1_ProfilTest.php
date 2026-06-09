@@ -305,10 +305,10 @@ class PKE1_ProfilTest extends DuskTestCase
 
             $browser->script("document.querySelector('input[name=\"name\"]').removeAttribute('required')");
             $browser->waitFor('input[name="name"]', 5)
-                 ->clear('@inputName')
-                 ->type('@inputAge', '25')
-                 ->select('@selectGender', 'Laki-laki');
-            (new ProfilePage)->clickSave($browser);
+                 ->clear('input[name="name"]')
+                 ->type('input[name="age"]', '25')
+                 ->select('select[name="gender"]', 'Laki-laki');
+            $browser->click('button[form="profileForm"]');
             $browser->assertSee('Nama lengkap wajib diisi.')
                     ->screenshot('tc08-nama-kosong-error');
         });
@@ -337,9 +337,9 @@ class PKE1_ProfilTest extends DuskTestCase
                 ageInput.removeAttribute('min');
             ");
             $browser->waitFor('input[name="age"]', 5)
-                 ->clear('@inputAge')
-                 ->select('@selectGender', 'Laki-laki');
-            (new ProfilePage)->clickSave($browser);
+                 ->clear('input[name="age"]')
+                 ->select('select[name="gender"]', 'Laki-laki');
+            $browser->click('button[form="profileForm"]');
             $browser->assertSee('Usia wajib diisi.')
                     ->screenshot('tc09-usia-kosong-error');
         });
