@@ -11,33 +11,10 @@ use Laravel\Dusk\Browser;
 use Tests\Browser\Pages\ProfilePage;
 use Tests\DuskTestCase;
 
-/**
- * ═══════════════════════════════════════════════════════════
- * PKE-1 — Pengelolaan Profil Pasien
- * Subtask: PKE-22 (Lihat Profil) · PKE-23 (Ubah Profil)
- * ═══════════════════════════════════════════════════════════
- *
- *  TC-01  Akses halaman profil
- *  TC-02  Data ditampilkan di view mode
- *  TC-03  Mode read-only saat pertama dibuka
- *  TC-04  Data kosong / edge case (profil belum lengkap)
- *  TC-05  Klik "Edit" → form muncul
- *  TC-06  Auto-fill data saat masuk mode edit
- *  TC-07  Input valid (Nama + Usia positif)
- *  TC-10  Usia non-angka → ditolak oleh browser (type=number)
- *  TC-15  Simpan data valid → tersimpan ke database
- *  TC-16  Tidak klik Simpan → data tidak berubah
- *  TC-17  Notifikasi sukses muncul setelah simpan
- *  TC-18  Data ter-update setelah refresh
- */
 class PKE1_ProfilTest extends DuskTestCase
 {
     protected User $testUser;
     protected Profile $testProfile;
-
-    // ─────────────────────────────────────────────────────────
-    //  SETUP & TEARDOWN
-    // ─────────────────────────────────────────────────────────
 
     protected function setUp(): void
     {
@@ -46,19 +23,19 @@ class PKE1_ProfilTest extends DuskTestCase
         $uniqueId = Str::random(8);
 
         $this->testUser = User::create([
-            'full_name'    => 'Test Dusk PKE1',
-            'email'        => "dusk.pke1.{$uniqueId}@test.local",
-            'password_hash'=> Hash::make('Password123!'),
-            'role'         => 'user',
+            'full_name'     => 'Test Dusk PKE1',
+            'email'         => "dusk.pke1.{$uniqueId}@test.local",
+            'password_hash' => Hash::make('Password123!'),
+            'role'          => 'user',
         ]);
 
         $this->testProfile = Profile::create([
-            'id'     => $this->testUser->id,
-            'name'   => 'Budi Santoso',
-            'age'    => 30,
-            'gender' => 'Laki-laki',
-            'phone'  => '081234567890',
-            'address'=> 'Jl. Sudirman No. 1, Jakarta',
+            'id'      => $this->testUser->id,
+            'name'    => 'Budi Santoso',
+            'age'     => 30,
+            'gender'  => 'Laki-laki',
+            'phone'   => '081234567890',
+            'address' => 'Jl. Sudirman No. 1, Jakarta',
         ]);
     }
 
@@ -70,10 +47,6 @@ class PKE1_ProfilTest extends DuskTestCase
 
         parent::tearDown();
     }
-
-    // ─────────────────────────────────────────────────────────
-    //  HELPER
-    // ─────────────────────────────────────────────────────────
 
     private function loginAndGoToProfile(Browser $browser): Browser
     {
@@ -87,11 +60,7 @@ class PKE1_ProfilTest extends DuskTestCase
                        ->waitFor('#viewMode', 5);
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-01 · Akses halaman profil
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-01: Akses halaman profil */
     public function test_tc01_akses_halaman_profil(): void
     {
         $this->browse(function (Browser $browser) {
@@ -103,11 +72,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-02 · Data profil ditampilkan
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-02: Data profil ditampilkan */
     public function test_tc02_data_profil_tampil(): void
     {
         $this->testProfile->update([
@@ -125,11 +90,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-03 · Mode read-only saat pertama dibuka
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-03: Mode read-only saat pertama dibuka */
     public function test_tc03_mode_read_only_saat_dibuka(): void
     {
         $this->browse(function (Browser $browser) {
@@ -142,11 +103,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-04 · Edge case: data profil kosong / belum lengkap
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-04: Profil tidak lengkap tampil tanpa error */
     public function test_tc04_profil_tidak_lengkap_tampil_tanpa_error(): void
     {
         $this->testProfile->update([
@@ -164,11 +121,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-05 · Klik "Edit" → form muncul
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-05: Klik Edit, form muncul */
     public function test_tc05_klik_ubah_profil_form_muncul(): void
     {
         $this->browse(function (Browser $browser) {
@@ -180,11 +133,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-06 · Auto-fill data saat masuk mode edit
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-06: Auto-fill data saat masuk mode edit */
     public function test_tc06_autofill_saat_masuk_edit_mode(): void
     {
         $this->testProfile->update([
@@ -197,18 +146,14 @@ class PKE1_ProfilTest extends DuskTestCase
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
                  ->clickEdit($browser)
-                 ->assertInputValue('@inputName',  'Siti Rahayu')
-                 ->assertInputValue('@inputAge',   '28')
+                 ->assertInputValue('@inputName', 'Siti Rahayu')
+                 ->assertInputValue('@inputAge', '28')
                  ->assertSelected('@selectGender', 'Perempuan')
                  ->screenshot('tc06-autofill-edit-mode');
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-07 · Input valid — data diterima
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-07: Input valid diterima */
     public function test_tc07_input_valid_data_diterima(): void
     {
         $this->browse(function (Browser $browser) {
@@ -230,11 +175,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-10 · Usia non-angka → ditolak oleh browser (type="number")
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-10: Usia non-angka ditolak browser */
     public function test_tc10_usia_non_angka_ditolak(): void
     {
         $this->browse(function (Browser $browser) {
@@ -255,11 +196,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-15 · Simpan data valid → tersimpan ke database
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-15: Simpan valid tersimpan ke database */
     public function test_tc15_simpan_valid_tersimpan_ke_database(): void
     {
         $this->browse(function (Browser $browser) {
@@ -284,11 +221,7 @@ class PKE1_ProfilTest extends DuskTestCase
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-16 · Tidak klik Simpan → data tidak berubah
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-16: Tidak simpan, data tidak berubah */
     public function test_tc16_tidak_simpan_data_tidak_berubah(): void
     {
         $this->testProfile->update([
@@ -314,11 +247,7 @@ class PKE1_ProfilTest extends DuskTestCase
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-17 · Notifikasi sukses muncul setelah simpan
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-17: Notifikasi sukses muncul setelah simpan */
     public function test_tc17_notifikasi_sukses_muncul(): void
     {
         $this->browse(function (Browser $browser) {
@@ -337,11 +266,7 @@ class PKE1_ProfilTest extends DuskTestCase
         });
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  TC-18 · Data ter-update setelah refresh
-    // ─────────────────────────────────────────────────────────
-
-    /** @test */
+    /** @test TC-18: Data terupdate setelah refresh */
     public function test_tc18_data_terupdate_setelah_refresh(): void
     {
         $this->browse(function (Browser $browser) {
