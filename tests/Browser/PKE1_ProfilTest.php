@@ -129,7 +129,8 @@ class PKE1_ProfilTest extends DuskTestCase
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
                  ->assertSee('Profil Saya')
-                 ->assertPathIs('/profile');
+                 ->assertPathIs('/profile')
+                 ->screenshot('tc01-akses-halaman-profil');
         });
     }
 
@@ -144,7 +145,6 @@ class PKE1_ProfilTest extends DuskTestCase
      */
     public function test_tc02_data_profil_tampil(): void
     {
-        // Override profil dengan data yang lebih spesifik
         $this->testProfile->update([
             'name'   => 'Andi Wijaya',
             'age'    => 25,
@@ -155,7 +155,8 @@ class PKE1_ProfilTest extends DuskTestCase
             $this->loginAndGoToProfile($browser)
                  ->assertSee('Andi Wijaya')
                  ->assertSee('25')
-                 ->assertSee('Laki-laki');
+                 ->assertSee('Laki-laki')
+                 ->screenshot('tc02-data-profil-tampil');
         });
     }
 
@@ -176,7 +177,8 @@ class PKE1_ProfilTest extends DuskTestCase
 
             $browser->assertVisible('#viewMode')
                     ->assertMissing('#editMode')
-                    ->assertVisible('#topbarBtnEdit');
+                    ->assertVisible('#topbarBtnEdit')
+                    ->screenshot('tc03-mode-read-only');
         });
     }
 
@@ -201,7 +203,8 @@ class PKE1_ProfilTest extends DuskTestCase
             $this->loginAndGoToProfile($browser)
                  ->assertDontSee('500')
                  ->assertDontSee('Whoops')
-                 ->assertSee('-');   // field kosong tampil sebagai '-'
+                 ->assertSee('-')
+                 ->screenshot('tc04-profil-tidak-lengkap');
         });
     }
 
@@ -220,7 +223,8 @@ class PKE1_ProfilTest extends DuskTestCase
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
                  ->clickEdit($browser)
-                 ->assertInEditMode($browser);
+                 ->assertInEditMode($browser)
+                 ->screenshot('tc05-form-edit-muncul');
         });
     }
 
@@ -247,7 +251,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clickEdit($browser)
                  ->assertInputValue('@inputName',  'Siti Rahayu')
                  ->assertInputValue('@inputAge',   '28')
-                 ->assertSelected('@selectGender', 'Perempuan');
+                 ->assertSelected('@selectGender', 'Perempuan')
+                 ->screenshot('tc06-autofill-edit-mode');
         });
     }
 
@@ -272,9 +277,13 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clear('@inputAge')
                  ->type('@inputAge', '21')
                  ->select('@selectGender', 'Laki-laki')
-                 ->clickSave($browser)
-                 ->assertPathIs('/profile')
-                 ->assertDontSee('wajib diisi');
+                 ->screenshot('tc07-before-submit-valid');
+
+            (new ProfilePage)->clickSave($browser);
+
+            $browser->assertPathIs('/profile')
+                    ->assertDontSee('wajib diisi')
+                    ->screenshot('tc07-input-valid-diterima');
         });
     }
 
@@ -294,13 +303,13 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->on(new ProfilePage)
                  ->clickEdit($browser);
 
-            // Hapus atribut required agar browser tidak blok submit
             $browser->script("document.querySelector('input[name=\"name\"]').removeAttribute('required')");
             $browser->clear('@inputName')
                  ->type('@inputAge', '25')
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
-            $browser->assertSee('Nama lengkap wajib diisi.');
+            $browser->assertSee('Nama lengkap wajib diisi.')
+                    ->screenshot('tc08-nama-kosong-error');
         });
     }
 
@@ -321,7 +330,6 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clickEdit($browser)
                  ->type('@inputName', 'Budi');
 
-            // Hapus required dan min agar browser tidak blok submit
             $browser->script("
                 const ageInput = document.querySelector('input[name=\"age\"]');
                 ageInput.removeAttribute('required');
@@ -331,7 +339,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clear('@inputAge')
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
-            $browser->assertSee('Usia wajib diisi.');
+            $browser->assertSee('Usia wajib diisi.')
+                    ->screenshot('tc09-usia-kosong-error');
         });
     }
 
@@ -354,6 +363,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->type('@inputAge', 'abc');
 
             $ageValue = $browser->value('@inputAge');
+
+            $browser->screenshot('tc10-usia-non-angka-ditolak');
 
             $this->assertEmpty(
                 $ageValue,
@@ -379,7 +390,6 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clickEdit($browser)
                  ->type('@inputName', 'Budi');
 
-            // Hapus constraint min agar browser tidak blok submit
             $browser->script("document.querySelector('input[name=\"age\"]').removeAttribute('min')");
             $browser->pause(300)
                  ->clear('@inputAge')
@@ -387,7 +397,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
             $browser->waitForText('Usia harus berupa angka positif.', 5)
-                 ->assertSee('Usia harus berupa angka positif.');
+                    ->assertSee('Usia harus berupa angka positif.')
+                    ->screenshot('tc11-usia-negatif-error');
         });
     }
 
@@ -413,7 +424,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->type('@inputAge', '0')
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
-            $browser->assertSee('Usia harus berupa angka positif.');
+            $browser->assertSee('Usia harus berupa angka positif.')
+                    ->screenshot('tc12-usia-nol-error');
         });
     }
 
@@ -434,17 +446,14 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clickEdit($browser)
                  ->type('@inputName', 'Budi');
 
-            // Ubah type ke text agar bisa mengirim nilai desimal ke server
             $browser->script("document.querySelector('input[name=\"age\"]').type = 'text'");
             $browser->clear('@inputAge')
                  ->type('@inputAge', '21.5')
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
 
-            // Tunggu halaman reload setelah submit
             $browser->pause(500);
 
-            // Cek ada pesan error dari server (bisa berbagai format)
             $pageSource = $browser->driver->getPageSource();
             $hasError = str_contains($pageSource, 'integer')
                 || str_contains($pageSource, 'bilangan bulat')
@@ -452,6 +461,8 @@ class PKE1_ProfilTest extends DuskTestCase
                 || str_contains($pageSource, 'wajib diisi')
                 || str_contains($pageSource, 'must be an integer')
                 || str_contains($pageSource, 'must be a number');
+
+            $browser->screenshot('tc13-usia-desimal-error');
 
             $this->assertTrue(
                 $hasError,
@@ -479,12 +490,12 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->type('@inputAge', '25')
                  ->select('@selectGender', '');
 
-            // Hapus required agar browser tidak blok submit
             $browser->script("document.querySelector('select[name=\"gender\"]').removeAttribute('required')");
             $browser->pause(300);
             (new ProfilePage)->clickSave($browser);
             $browser->waitForText('Jenis kelamin wajib dipilih.', 5)
-                 ->assertSee('Jenis kelamin wajib dipilih.');
+                    ->assertSee('Jenis kelamin wajib dipilih.')
+                    ->screenshot('tc14-gender-kosong-error');
         });
     }
 
@@ -509,10 +520,10 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->type('@inputAge', '32')
                  ->select('@selectGender', 'Perempuan')
                  ->clickSave($browser)
-                 ->assertPathIs('/profile');
+                 ->assertPathIs('/profile')
+                 ->screenshot('tc15-simpan-valid-ke-database');
         });
 
-        // Verifikasi langsung ke database
         $this->assertDatabaseHas('profiles', [
             'id'     => $this->testUser->id,
             'name'   => 'Citra Dewi',
@@ -541,14 +552,14 @@ class PKE1_ProfilTest extends DuskTestCase
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
                  ->clickEdit($browser)
-                 // Ubah nama di form tapi TIDAK klik Simpan
                  ->clear('@inputName')
                  ->type('@inputName', 'Nama Diubah Sementara')
-                 ->clickCancel($browser)   // klik Batal
-                 ->assertInViewMode($browser);
+                 ->screenshot('tc16-before-cancel')
+                 ->clickCancel($browser)
+                 ->assertInViewMode($browser)
+                 ->screenshot('tc16-setelah-batal-view-mode');
         });
 
-        // Data di DB harus tetap 'Nama Asli'
         $this->assertDatabaseHas('profiles', [
             'id'   => $this->testUser->id,
             'name' => 'Nama Asli',
@@ -577,7 +588,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->select('@selectGender', 'Laki-laki')
                  ->clickSave($browser)
                  ->waitForLocation('/profile', 5)
-                 ->waitForText('Profil berhasil diperbarui', 5);
+                 ->waitForText('Profil berhasil diperbarui', 5)
+                 ->screenshot('tc17-notifikasi-sukses');
         });
     }
 
@@ -593,7 +605,6 @@ class PKE1_ProfilTest extends DuskTestCase
     public function test_tc18_data_terupdate_setelah_refresh(): void
     {
         $this->browse(function (Browser $browser) {
-            // Simpan data baru
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
                  ->clickEdit($browser)
@@ -606,12 +617,12 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->waitForLocation('/profile', 5)
                  ->waitForText('Profil berhasil diperbarui', 5);
 
-            // Refresh dan verifikasi data terbaru tampil
             $browser->refresh()
                     ->waitFor('#viewMode', 5)
                     ->assertSee('Eka Putri')
                     ->assertSee('19')
-                    ->assertSee('Perempuan');
+                    ->assertSee('Perempuan')
+                    ->screenshot('tc18-data-terupdate-setelah-refresh');
         });
     }
 }
