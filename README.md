@@ -7,15 +7,18 @@ Repository ini menampung file-file **Laravel Dusk** untuk pengujian end-to-end f
 ```
 medislot-dusk-tests/
 ├── tests/
-│   ├── DuskTestCase.php            ← Base class untuk semua Dusk tests
+│   ├── DuskTestCase.php                ← Base class untuk semua Dusk tests
 │   └── Browser/
-│       ├── PKE1_ProfilTest.php     ← 18 TC: Pengelolaan Profil (PKE-1, PKE-22, PKE-23)
+│       ├── PKE1_ProfilTest.php         ← 12 TC: Pengelolaan Profil
+│       ├── PKE2_DataKesehatanTest.php  ← 21 TC: Data Kesehatan Dasar
+│       ├── PKE5_JadwalTest.php         ← 25 TC: Perencanaan Jadwal Pemeriksaan
 │       ├── Pages/
-│       │   ├── Page.php            ← Base Page Object
-│       │   └── ProfilePage.php     ← Page Object untuk /profile
-│       ├── screenshots/            ← Screenshot otomatis saat test gagal
-│       └── console/                ← Console log saat test gagal
-├── .env.dusk.local                 ← Env override saat menjalankan Dusk
+│       │   ├── Page.php                ← Base Page Object
+│       │   ├── ProfilePage.php         ← Page Object untuk /profile
+│       │   └── DataKesehatanPage.php   ← Page Object untuk /data-kesehatan
+│       ├── screenshots/                ← Screenshot otomatis saat test gagal
+│       └── console/                    ← Console log saat test gagal
+├── .env.dusk.local                     ← Env override saat menjalankan Dusk
 └── README.md
 ```
 
@@ -73,11 +76,55 @@ php artisan dusk tests/Browser/PKE1_ProfilTest.php --filter=tc01_akses_halaman_p
 | TC-17 | `test_tc17_notifikasi_sukses_muncul` | Simpan berhasil → flash "Profil berhasil diperbarui" |
 | TC-18 | `test_tc18_data_terupdate_setelah_refresh` | Refresh setelah simpan → data terbaru tampil |
 
+## Test Cases (PKE-5 Perencanaan Jadwal Pemeriksaan)
+
+| No | Test Case | Deskripsi |
+|----|-----------|-----------|
+| TC-01 | `test_tc01_membuka_form_tambah_jadwal` | Klik "Tambah Jadwal" → navigasi ke /jadwal/create |
+| TC-02 | `test_tc02_menampilkan_form_penjadwalan` | Form menampilkan field jenis, fasilitas, tanggal, waktu |
+| TC-03 | `test_tc03_memilih_jenis_pemeriksaan` | Input jenis pemeriksaan diterima dan tersimpan di form |
+| TC-04 | `test_tc04_memilih_tanggal_pemeriksaan` | Input tanggal diterima dan tersimpan di form |
+| TC-05 | `test_tc05_menampilkan_slot_tanggal_tersedia` | Tanggal mendatang → info "Tanggal tersedia" muncul |
+| TC-06 | `test_tc06_memilih_waktu_pemeriksaan` | Input waktu diterima dan tersimpan di form |
+| TC-07 | `test_tc07_menampilkan_slot_waktu_tersedia` | Setelah pilih waktu → info "Waktu tersedia" muncul |
+| TC-08 | `test_tc08_validasi_slot_jadwal_tersedia` | Tanggal mendatang → indikator slot tersedia tampil |
+| TC-09 | `test_tc09_validasi_slot_tanggal_sudah_lewat` | Tanggal lewat → info "Tanggal sudah lewat" muncul |
+| TC-10 | `test_tc10_menyimpan_jadwal_pemeriksaan` | Isi form lengkap → data tersimpan di database |
+| TC-11 | `test_tc11_menampilkan_ringkasan_jadwal` | Setelah buat jadwal → card jadwal tampil di index |
+| TC-12 | `test_tc12_menampilkan_detail_jadwal` | Card jadwal tampil detail + tombol Edit & Hapus |
+| TC-13 | `test_tc13_membuka_form_edit_jadwal` | Klik Edit → form edit terbuka dengan data sebelumnya |
+| TC-14 | `test_tc14_mengubah_tanggal_pemeriksaan` | Ubah tanggal di form edit → nilai baru tersimpan |
+| TC-15 | `test_tc15_mengubah_waktu_pemeriksaan` | Ubah waktu di form edit → nilai baru tersimpan |
+| TC-16 | `test_tc16_validasi_slot_saat_edit` | Set tanggal + waktu baru di edit → field menerima nilai |
+| TC-17 | `test_tc17_memperbarui_jadwal` | Simpan edit → database diperbarui |
+| TC-18 | `test_tc18_notifikasi_update_berhasil` | Simpan edit → notifikasi "Jadwal berhasil diperbarui" |
+| TC-19 | `test_tc19_tombol_hapus_jadwal_tersedia` | Tombol Hapus tersedia pada card jadwal |
+| TC-20 | `test_tc20_dialog_konfirmasi_hapus` | Klik Hapus → native confirm() dialog muncul |
+| TC-21 | `test_tc21_konfirmasi_hapus_jadwal` | Konfirmasi hapus → data terhapus dari database |
+| TC-22 | `test_tc22_notifikasi_hapus_berhasil` | Hapus berhasil → notifikasi "Jadwal berhasil dihapus" |
+| TC-23 | `test_tc23_membatalkan_hapus_jadwal` | Batal hapus → data tetap ada di database |
+| TC-24 | `test_tc24_edit_jadwal_status_selesai` | Edit jadwal status selesai → form edit dapat diakses |
+| TC-25 | `test_tc25_menampilkan_data_jadwal_terbaru` | Setelah update → list jadwal menampilkan data terbaru |
+
+## Cara Menjalankan Per PKE
+
+```bash
+# PKE-1 Pengelolaan Profil
+php artisan dusk tests/Browser/PKE1_ProfilTest.php
+
+# PKE-2 Data Kesehatan Dasar
+php artisan dusk tests/Browser/PKE2_DataKesehatanTest.php
+
+# PKE-5 Perencanaan Jadwal Pemeriksaan
+php artisan dusk tests/Browser/PKE5_JadwalTest.php
+```
+
 ## Hasil Terakhir
 
-```
-Tests: 18 passed (33 assertions)
-Duration: ~61s
-```
+| PKE | Tests | Assertions | Duration |
+|-----|-------|-----------|----------|
+| PKE-1 | 12 passed | 26 | ~48s |
+| PKE-2 | 21 passed | 37 | ~86s |
+| PKE-5 | 25 passed | 42 | ~81s |
 
 Dijalankan pada: **2026-06-09** | Laravel 13.5 | Chrome 148 | PHP 8.x
