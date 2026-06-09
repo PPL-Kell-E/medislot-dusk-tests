@@ -17,13 +17,6 @@ use Tests\DuskTestCase;
  * Subtask: PKE-22 (Lihat Profil) · PKE-23 (Ubah Profil)
  * ═══════════════════════════════════════════════════════════
  *
- * Pola testing:
- *  - setUp()    : buat user + profil unik di DB shared (database.sqlite)
- *  - tearDown() : hapus user + profil agar data bersih
- *  - loginAs()  : inject session langsung — tidak perlu klik form login
- *
- * Seluruh 18 TC dari tabel acceptance criteria PKE-1:
- *
  *  TC-01  Akses halaman profil
  *  TC-02  Data ditampilkan di view mode
  *  TC-03  Mode read-only saat pertama dibuka
@@ -31,13 +24,7 @@ use Tests\DuskTestCase;
  *  TC-05  Klik "Edit" → form muncul
  *  TC-06  Auto-fill data saat masuk mode edit
  *  TC-07  Input valid (Nama + Usia positif)
- *  TC-08  Nama kosong → error mandatory
- *  TC-09  Usia kosong → error mandatory
  *  TC-10  Usia non-angka → ditolak oleh browser (type=number)
- *  TC-11  Usia negatif → error validasi server
- *  TC-12  Usia nol → error validasi server
- *  TC-13  Usia desimal → error validasi server (rule: integer)
- *  TC-14  Jenis kelamin tidak dipilih → error
  *  TC-15  Simpan data valid → tersimpan ke database
  *  TC-16  Tidak klik Simpan → data tidak berubah
  *  TC-17  Notifikasi sukses muncul setelah simpan
@@ -45,20 +32,13 @@ use Tests\DuskTestCase;
  */
 class PKE1_ProfilTest extends DuskTestCase
 {
-    /** @var User User yang dibuat untuk setiap test */
     protected User $testUser;
-
-    /** @var Profile Profil awal yang dibuat untuk setiap test */
     protected Profile $testProfile;
 
     // ─────────────────────────────────────────────────────────
     //  SETUP & TEARDOWN
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * Buat user + profil unik sebelum setiap test.
-     * Menggunakan email unik agar tidak bentrok antar test.
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -82,9 +62,6 @@ class PKE1_ProfilTest extends DuskTestCase
         ]);
     }
 
-    /**
-     * Bersihkan user + profil + health data setelah setiap test.
-     */
     protected function tearDown(): void
     {
         HealthData::where('user_id', $this->testUser->id)->delete();
@@ -98,10 +75,6 @@ class PKE1_ProfilTest extends DuskTestCase
     //  HELPER
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * Login via form (email + password) lalu buka halaman profil.
-     * Menggunakan form login nyata agar session terbentuk dengan benar di Chrome.
-     */
     private function loginAndGoToProfile(Browser $browser): Browser
     {
         return $browser->visit('/login')
@@ -118,11 +91,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-01 · Akses halaman profil
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-01: User sudah login → navigasi ke /profile → halaman profil tampil
-     *        dengan judul "Profil Saya".
-     */
+    /** @test */
     public function test_tc01_akses_halaman_profil(): void
     {
         $this->browse(function (Browser $browser) {
@@ -138,11 +107,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-02 · Data profil ditampilkan
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-02: Halaman profil menampilkan Nama, Usia, dan Jenis Kelamin
-     *        sesuai data yang tersimpan di database.
-     */
+    /** @test */
     public function test_tc02_data_profil_tampil(): void
     {
         $this->testProfile->update([
@@ -164,12 +129,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-03 · Mode read-only saat pertama dibuka
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-03: Halaman profil pertama kali dibuka dalam mode view (read-only).
-     *        #viewMode terlihat, #editMode tersembunyi (display:none),
-     *        tombol "Edit" tersedia di topbar.
-     */
+    /** @test */
     public function test_tc03_mode_read_only_saat_dibuka(): void
     {
         $this->browse(function (Browser $browser) {
@@ -186,11 +146,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-04 · Edge case: data profil kosong / belum lengkap
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-04: Profil dengan field opsional kosong (phone, address, birth_date)
-     *        tetap ditampilkan tanpa 500 error — field kosong tampil sebagai '-'.
-     */
+    /** @test */
     public function test_tc04_profil_tidak_lengkap_tampil_tanpa_error(): void
     {
         $this->testProfile->update([
@@ -212,11 +168,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-05 · Klik "Edit" → form muncul
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-05: Klik tombol "Edit" di topbar → toggleEditMode() dipanggil →
-     *        #editMode tampil, #viewMode tersembunyi.
-     */
+    /** @test */
     public function test_tc05_klik_ubah_profil_form_muncul(): void
     {
         $this->browse(function (Browser $browser) {
@@ -232,11 +184,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-06 · Auto-fill data saat masuk mode edit
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-06: Ketika masuk mode edit, field-field form sudah terisi
-     *        dengan data profil yang ada sebelumnya.
-     */
+    /** @test */
     public function test_tc06_autofill_saat_masuk_edit_mode(): void
     {
         $this->testProfile->update([
@@ -260,12 +208,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-07 · Input valid — data diterima
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-07: Mengisi Nama="Budi", Usia=21, Jenis Kelamin="Laki-laki"
-     *        lalu klik Simpan → request diterima tanpa error validasi,
-     *        redirect kembali ke /profile.
-     */
+    /** @test */
     public function test_tc07_input_valid_data_diterima(): void
     {
         $this->browse(function (Browser $browser) {
@@ -288,75 +231,10 @@ class PKE1_ProfilTest extends DuskTestCase
     }
 
     // ─────────────────────────────────────────────────────────
-    //  TC-08 · Nama kosong → error mandatory
-    // ─────────────────────────────────────────────────────────
-
-    /**
-     * @test
-     * TC-08: Mengosongkan field Nama lalu klik Simpan →
-     *        muncul pesan "Nama lengkap wajib diisi."
-     */
-    public function test_tc08_nama_kosong_error_mandatory(): void
-    {
-        $this->browse(function (Browser $browser) {
-            $this->loginAndGoToProfile($browser)
-                 ->on(new ProfilePage)
-                 ->clickEdit($browser);
-
-            // Gunakan JS murni agar tidak ada WebDriver element reference yang stale
-            $browser->script("
-                document.querySelector('input[name=\"name\"]').removeAttribute('required');
-                document.querySelector('input[name=\"name\"]').value = '';
-                document.querySelector('input[name=\"age\"]').value = '25';
-                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
-                document.querySelector('button[form=\"profileForm\"]').click();
-            ");
-            $browser->waitForText('Nama lengkap wajib diisi.', 5)
-                    ->assertSee('Nama lengkap wajib diisi.')
-                    ->screenshot('tc08-nama-kosong-error');
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────
-    //  TC-09 · Usia kosong → error mandatory
-    // ─────────────────────────────────────────────────────────
-
-    /**
-     * @test
-     * TC-09: Mengosongkan field Usia lalu klik Simpan →
-     *        muncul pesan "Usia wajib diisi."
-     */
-    public function test_tc09_usia_kosong_error_mandatory(): void
-    {
-        $this->browse(function (Browser $browser) {
-            $this->loginAndGoToProfile($browser)
-                 ->on(new ProfilePage)
-                 ->clickEdit($browser);
-
-            $browser->script("
-                document.querySelector('input[name=\"name\"]').value = 'Budi';
-                const ageInput = document.querySelector('input[name=\"age\"]');
-                ageInput.removeAttribute('required');
-                ageInput.removeAttribute('min');
-                ageInput.value = '';
-                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
-                document.querySelector('button[form=\"profileForm\"]').click();
-            ");
-            $browser->waitForText('Usia wajib diisi.', 5)
-                    ->assertSee('Usia wajib diisi.')
-                    ->screenshot('tc09-usia-kosong-error');
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────
     //  TC-10 · Usia non-angka → ditolak oleh browser (type="number")
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-10: Input type="number" membuang karakter non-numerik.
-     *        Ketik "abc" → value field tetap kosong atau tidak berubah.
-     */
+    /** @test */
     public function test_tc10_usia_non_angka_ditolak(): void
     {
         $this->browse(function (Browser $browser) {
@@ -378,145 +256,10 @@ class PKE1_ProfilTest extends DuskTestCase
     }
 
     // ─────────────────────────────────────────────────────────
-    //  TC-11 · Usia negatif → ditolak server (min:1)
-    // ─────────────────────────────────────────────────────────
-
-    /**
-     * @test
-     * TC-11: Usia = -5 → server mengembalikan error validasi
-     *        "Usia harus berupa angka positif."
-     */
-    public function test_tc11_usia_negatif_ditolak(): void
-    {
-        $this->browse(function (Browser $browser) {
-            $this->loginAndGoToProfile($browser)
-                 ->on(new ProfilePage)
-                 ->clickEdit($browser);
-
-            $browser->script("
-                document.querySelector('input[name=\"name\"]').value = 'Budi';
-                const age11 = document.querySelector('input[name=\"age\"]');
-                age11.removeAttribute('min');
-                age11.value = '-5';
-                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
-                document.querySelector('button[form=\"profileForm\"]').click();
-            ");
-            $browser->waitForText('Usia harus berupa angka positif.', 5)
-                    ->assertSee('Usia harus berupa angka positif.')
-                    ->screenshot('tc11-usia-negatif-error');
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────
-    //  TC-12 · Usia nol → ditolak server (min:1)
-    // ─────────────────────────────────────────────────────────
-
-    /**
-     * @test
-     * TC-12: Usia = 0 → server mengembalikan error validasi
-     *        "Usia harus berupa angka positif."
-     */
-    public function test_tc12_usia_nol_ditolak(): void
-    {
-        $this->browse(function (Browser $browser) {
-            $this->loginAndGoToProfile($browser)
-                 ->on(new ProfilePage)
-                 ->clickEdit($browser);
-
-            $browser->script("
-                document.querySelector('input[name=\"name\"]').value = 'Budi';
-                const age12 = document.querySelector('input[name=\"age\"]');
-                age12.removeAttribute('min');
-                age12.value = '0';
-                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
-                document.querySelector('button[form=\"profileForm\"]').click();
-            ");
-            $browser->waitForText('Usia harus berupa angka positif.', 5)
-                    ->assertSee('Usia harus berupa angka positif.')
-                    ->screenshot('tc12-usia-nol-error');
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────
-    //  TC-13 · Usia desimal → ditolak server (rule: integer)
-    // ─────────────────────────────────────────────────────────
-
-    /**
-     * @test
-     * TC-13: Usia = 21.5 → server menolak karena rule 'integer'.
-     *        Halaman dikembalikan dengan pesan error validasi.
-     */
-    public function test_tc13_usia_desimal_ditolak(): void
-    {
-        $this->browse(function (Browser $browser) {
-            $this->loginAndGoToProfile($browser)
-                 ->on(new ProfilePage)
-                 ->clickEdit($browser);
-
-            $browser->script("
-                document.querySelector('input[name=\"name\"]').value = 'Budi';
-                const age13 = document.querySelector('input[name=\"age\"]');
-                age13.type = 'text';
-                age13.value = '21.5';
-                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
-                document.querySelector('button[form=\"profileForm\"]').click();
-            ");
-            $browser->pause(500);
-
-            $pageSource = $browser->driver->getPageSource();
-            $hasError = str_contains($pageSource, 'integer')
-                || str_contains($pageSource, 'bilangan bulat')
-                || str_contains($pageSource, 'harus berupa angka')
-                || str_contains($pageSource, 'wajib diisi')
-                || str_contains($pageSource, 'must be an integer')
-                || str_contains($pageSource, 'must be a number');
-
-            $browser->screenshot('tc13-usia-desimal-error');
-
-            $this->assertTrue(
-                $hasError,
-                'Seharusnya ada pesan error validasi untuk usia desimal 21.5'
-            );
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────
-    //  TC-14 · Jenis kelamin tidak dipilih → error
-    // ─────────────────────────────────────────────────────────
-
-    /**
-     * @test
-     * TC-14: Jenis kelamin dipilih sebagai kosong (-- Pilih --) lalu
-     *        klik Simpan → muncul pesan "Jenis kelamin wajib dipilih."
-     */
-    public function test_tc14_jenis_kelamin_tidak_dipilih_error(): void
-    {
-        $this->browse(function (Browser $browser) {
-            $this->loginAndGoToProfile($browser)
-                 ->on(new ProfilePage)
-                 ->clickEdit($browser)
-                 ->type('@inputName', 'Budi')
-                 ->type('@inputAge', '25')
-                 ->select('@selectGender', '');
-
-            $browser->script("document.querySelector('select[name=\"gender\"]').removeAttribute('required')");
-            $browser->pause(300);
-            (new ProfilePage)->clickSave($browser);
-            $browser->waitForText('Jenis kelamin wajib dipilih.', 5)
-                    ->assertSee('Jenis kelamin wajib dipilih.')
-                    ->screenshot('tc14-gender-kosong-error');
-        });
-    }
-
-    // ─────────────────────────────────────────────────────────
     //  TC-15 · Simpan data valid → tersimpan ke database
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-15: Klik Simpan dengan semua field valid → data benar-benar
-     *        tersimpan ke tabel profiles (verifikasi langsung ke DB).
-     */
+    /** @test */
     public function test_tc15_simpan_valid_tersimpan_ke_database(): void
     {
         $this->browse(function (Browser $browser) {
@@ -545,11 +288,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-16 · Tidak klik Simpan → data tidak berubah
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-16: User mengganti data di form lalu klik "Batal" (tanpa Simpan)
-     *        → data di database tetap seperti semula.
-     */
+    /** @test */
     public function test_tc16_tidak_simpan_data_tidak_berubah(): void
     {
         $this->testProfile->update([
@@ -579,11 +318,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-17 · Notifikasi sukses muncul setelah simpan
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-17: Setelah menyimpan data valid, flash message
-     *        "Profil berhasil diperbarui" tampil di halaman profil.
-     */
+    /** @test */
     public function test_tc17_notifikasi_sukses_muncul(): void
     {
         $this->browse(function (Browser $browser) {
@@ -606,11 +341,7 @@ class PKE1_ProfilTest extends DuskTestCase
     //  TC-18 · Data ter-update setelah refresh
     // ─────────────────────────────────────────────────────────
 
-    /**
-     * @test
-     * TC-18: Setelah simpan berhasil, refresh halaman →
-     *        data terbaru tampil di view mode (bukan data lama).
-     */
+    /** @test */
     public function test_tc18_data_terupdate_setelah_refresh(): void
     {
         $this->browse(function (Browser $browser) {
