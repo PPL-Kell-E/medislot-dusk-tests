@@ -303,13 +303,16 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->on(new ProfilePage)
                  ->clickEdit($browser);
 
-            $browser->script("document.querySelector('input[name=\"name\"]').removeAttribute('required')");
-            $browser->waitFor('input[name="name"]', 5)
-                 ->clear('input[name="name"]')
-                 ->type('input[name="age"]', '25')
-                 ->select('select[name="gender"]', 'Laki-laki');
-            $browser->click('button[form="profileForm"]');
-            $browser->assertSee('Nama lengkap wajib diisi.')
+            // Gunakan JS murni agar tidak ada WebDriver element reference yang stale
+            $browser->script("
+                document.querySelector('input[name=\"name\"]').removeAttribute('required');
+                document.querySelector('input[name=\"name\"]').value = '';
+                document.querySelector('input[name=\"age\"]').value = '25';
+                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
+                document.querySelector('button[form=\"profileForm\"]').click();
+            ");
+            $browser->waitForText('Nama lengkap wajib diisi.', 5)
+                    ->assertSee('Nama lengkap wajib diisi.')
                     ->screenshot('tc08-nama-kosong-error');
         });
     }
@@ -328,19 +331,19 @@ class PKE1_ProfilTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
-                 ->clickEdit($browser)
-                 ->type('@inputName', 'Budi');
+                 ->clickEdit($browser);
 
             $browser->script("
+                document.querySelector('input[name=\"name\"]').value = 'Budi';
                 const ageInput = document.querySelector('input[name=\"age\"]');
                 ageInput.removeAttribute('required');
                 ageInput.removeAttribute('min');
+                ageInput.value = '';
+                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
+                document.querySelector('button[form=\"profileForm\"]').click();
             ");
-            $browser->waitFor('input[name="age"]', 5)
-                 ->clear('input[name="age"]')
-                 ->select('select[name="gender"]', 'Laki-laki');
-            $browser->click('button[form="profileForm"]');
-            $browser->assertSee('Usia wajib diisi.')
+            $browser->waitForText('Usia wajib diisi.', 5)
+                    ->assertSee('Usia wajib diisi.')
                     ->screenshot('tc09-usia-kosong-error');
         });
     }
@@ -388,15 +391,16 @@ class PKE1_ProfilTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
-                 ->clickEdit($browser)
-                 ->type('@inputName', 'Budi');
+                 ->clickEdit($browser);
 
-            $browser->script("document.querySelector('input[name=\"age\"]').removeAttribute('min')");
-            $browser->pause(300)
-                 ->clear('@inputAge')
-                 ->type('@inputAge', '-5')
-                 ->select('@selectGender', 'Laki-laki');
-            (new ProfilePage)->clickSave($browser);
+            $browser->script("
+                document.querySelector('input[name=\"name\"]').value = 'Budi';
+                const age11 = document.querySelector('input[name=\"age\"]');
+                age11.removeAttribute('min');
+                age11.value = '-5';
+                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
+                document.querySelector('button[form=\"profileForm\"]').click();
+            ");
             $browser->waitForText('Usia harus berupa angka positif.', 5)
                     ->assertSee('Usia harus berupa angka positif.')
                     ->screenshot('tc11-usia-negatif-error');
@@ -417,15 +421,18 @@ class PKE1_ProfilTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
-                 ->clickEdit($browser)
-                 ->type('@inputName', 'Budi');
+                 ->clickEdit($browser);
 
-            $browser->script("document.querySelector('input[name=\"age\"]').removeAttribute('min')");
-            $browser->clear('@inputAge')
-                 ->type('@inputAge', '0')
-                 ->select('@selectGender', 'Laki-laki');
-            (new ProfilePage)->clickSave($browser);
-            $browser->assertSee('Usia harus berupa angka positif.')
+            $browser->script("
+                document.querySelector('input[name=\"name\"]').value = 'Budi';
+                const age12 = document.querySelector('input[name=\"age\"]');
+                age12.removeAttribute('min');
+                age12.value = '0';
+                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
+                document.querySelector('button[form=\"profileForm\"]').click();
+            ");
+            $browser->waitForText('Usia harus berupa angka positif.', 5)
+                    ->assertSee('Usia harus berupa angka positif.')
                     ->screenshot('tc12-usia-nol-error');
         });
     }
@@ -444,15 +451,16 @@ class PKE1_ProfilTest extends DuskTestCase
         $this->browse(function (Browser $browser) {
             $this->loginAndGoToProfile($browser)
                  ->on(new ProfilePage)
-                 ->clickEdit($browser)
-                 ->type('@inputName', 'Budi');
+                 ->clickEdit($browser);
 
-            $browser->script("document.querySelector('input[name=\"age\"]').type = 'text'");
-            $browser->clear('@inputAge')
-                 ->type('@inputAge', '21.5')
-                 ->select('@selectGender', 'Laki-laki');
-            (new ProfilePage)->clickSave($browser);
-
+            $browser->script("
+                document.querySelector('input[name=\"name\"]').value = 'Budi';
+                const age13 = document.querySelector('input[name=\"age\"]');
+                age13.type = 'text';
+                age13.value = '21.5';
+                document.querySelector('select[name=\"gender\"]').value = 'Laki-laki';
+                document.querySelector('button[form=\"profileForm\"]').click();
+            ");
             $browser->pause(500);
 
             $pageSource = $browser->driver->getPageSource();
