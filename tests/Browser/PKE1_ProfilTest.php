@@ -304,7 +304,8 @@ class PKE1_ProfilTest extends DuskTestCase
                  ->clickEdit($browser);
 
             $browser->script("document.querySelector('input[name=\"name\"]').removeAttribute('required')");
-            $browser->clear('@inputName')
+            $browser->waitFor('input[name="name"]', 5)
+                 ->clear('@inputName')
                  ->type('@inputAge', '25')
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
@@ -335,7 +336,7 @@ class PKE1_ProfilTest extends DuskTestCase
                 ageInput.removeAttribute('required');
                 ageInput.removeAttribute('min');
             ");
-            $browser->pause(300)
+            $browser->waitFor('input[name="age"]', 5)
                  ->clear('@inputAge')
                  ->select('@selectGender', 'Laki-laki');
             (new ProfilePage)->clickSave($browser);
