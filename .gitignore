@@ -1,0 +1,7 @@
+vendor/
+node_modules/
+tests/Browser/screenshots/*
+tests/Browser/console/*
+!tests/Browser/screenshots/.gitkeep
+!tests/Browser/console/.gitkeep
+.env
